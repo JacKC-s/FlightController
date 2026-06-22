@@ -68,7 +68,7 @@ typedef struct {
     uint8_t Speed;
     uint8_t Pull;
     uint8_t State;
-    uint8_t AF_Selection;
+    uint8_t AF_Select;
 } GPIO_PinConfig_t;
 
 // Function Definitions
