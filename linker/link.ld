@@ -5,9 +5,34 @@ MEMORY{
 }
 _estack = ORIGIN(sram) + LENGTH(sram);
 
+/*Didnt link the C libraries*/
 SECTIONS {
-    .vectors : {KEEP(*(.vectors))} > flash
-    .text : {*(.text*)} > flash
+    .vectors : {KEEP(*(.isr_vector))} > flash
+    .text : {
+        *(.text*)
+        KEEP(*(.init)) // C libraries linked
+        KEEP(*(.fini))
+    } > flash 
+
+    /* C library init/fini — needed by __libc_init_array in startup - AI Found this bug, dont know if it works */
+    .preinit_array : {
+        PROVIDE_HIDDEN(__preinit_array_start = .);
+        KEEP(*(.preinit_array*))
+        PROVIDE_HIDDEN(__preinit_array_end = .);
+    } > flash
+    .init_array : {
+        PROVIDE_HIDDEN(__init_array_start = .);
+        KEEP(*(SORT(.init_array.*)))
+        KEEP(*(.init_array*))
+        PROVIDE_HIDDEN(__init_array_end = .);
+    } > flash
+    .fini_array : {
+        PROVIDE_HIDDEN(__fini_array_start = .);
+        KEEP(*(SORT(.fini_array.*)))
+        KEEP(*(.fini_array*))
+        PROVIDE_HIDDEN(__fini_array_end = .);
+    } > flash
+    
     .rodata : {*(.rodata*)} > flash
 
     .data : {
