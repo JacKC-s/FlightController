@@ -29,8 +29,7 @@ void GPIO_Init(GPIO_TypeDef *GPIOx, GPIO_PinConfig_t *Config) {
   uint8_t pin = Config->Pin;
 
   // Set mode
-  GPIOx->MODER &=
-      ~(3UL << (pin * 2)); // multipled by two because two bit register.
+  GPIOx->MODER &= ~(3UL << (pin * 2)); // multipled by two because two bit register.
   // The 3UL is just 3 in binary being bitshifted
   GPIOx->MODER |= ((uint32_t)Config->Mode << (pin * 2));
 
@@ -73,4 +72,8 @@ void GPIO_TogglePin(GPIO_TypeDef *GPIOx, uint8_t pin) {
   GPIOx->ODR ^= (1UL << pin);
 }
 
+// I dont know if this properly works, will try it soon. -> Should work
+uint8_t GPIO_ReadPin(GPIO_TypeDef *GPIOx, uint8_t Pin) {
+  return ((GPIOx->IDR & (1UL>>>Pin)) != 0) ? 1 : 0;
+}
 // ADD READ WHEN USB COMMUNICATION WORKS
