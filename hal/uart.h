@@ -38,21 +38,31 @@ typedef struct {
 } UART_Config_t;
 
 
+typedef struct {
+    USART_TypeDef   *Instance; // Pointer to the hardware base address, this speeds up a lot
+    UART_Config_t   Init; // config settings init
+    uint8_t *pTxBuff; // Pointer to TX buffer
+    uint16_t txTranSize; // total transfer size -> 16 bit because of DMA down and up counter is 16 bit
+    uint16_t txTranRemain; // Remaining transfer size
+    uint8_t *pRxBuff;
+    uint16_t rxTranSize;
+    uint16_t rxTranRemain;
+} UART_HandleTypeDef;
+
 /*Everything under here is non functional yet. Need to learn more about UART.*/
 
 // Initialization functions
-void UART_Init(UART_Config_t *Config);
-void UART_DeInit(UART_Config_t *Config);
-//Low level init function?
+void UART_Init(UART_HandleTypeDef *huart);
+void UART_DeInit(UART_HandleTypeDef *huart);
 
 //TX functions
-void Transmit_Poll(UART_Config_t *Config, uint8_t data);
-void Transmit_Interrupt(UART_Config_t *Config, uint8_t data);
-void Transmit_DMA(UART_Config_t *Config, uint8_t data);
+void Transmit_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size, uint32_t timeout); // Most likely to not be used
+void Transmit_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size);
+void Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size);
 
 //RX functions
-uint8_t Recieve_Poll(UART_Config_t *Config);
-uint8_t Recieve_Interrupt(UART_Config_t *Config);
-uint8_t Recieve_DMA(UART_Config_t *Config);
+uint8_t Recieve_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size, uint32_t timeout); // Most likely to not be used
+uint8_t Recieve_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size);
+uint8_t Recieve_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size);
 
 #endif
