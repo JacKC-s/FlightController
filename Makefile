@@ -27,6 +27,7 @@ MCU   = $(CPU) -mthumb $(FPU) $(FLOAT)
 # C sources
 C_SOURCES  = app/main.c
 C_SOURCES += hal/gpio.c
+C_SOURCES += hal/uart.c
 C_SOURCES += cmsis/system_stm32f4xx.c
 C_SOURCES += freertos/src/tasks.c
 C_SOURCES += freertos/src/queue.c

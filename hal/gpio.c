@@ -59,7 +59,7 @@ void GPIO_Init(GPIO_TypeDef *GPIOx, GPIO_PinConfig_t *Config) {
   }
 }
 
-void GPIO_WritePin(GPIO_TypeDef *GPIOx, uint8_t pin, uint8_t state) {
+void GPIO_WritePin(GPIO_TypeDef *GPIOx, uint8_t pin, GPIO_STATE_t state) {
   if (state == GPIO_PIN_SET) {
     GPIOx->BSRR = (1UL << pin);
   } else {
@@ -74,6 +74,6 @@ void GPIO_TogglePin(GPIO_TypeDef *GPIOx, uint8_t pin) {
 
 // I dont know if this properly works, will try it soon. -> Should work
 uint8_t GPIO_ReadPin(GPIO_TypeDef *GPIOx, uint8_t Pin) {
-  return ((GPIOx->IDR & (1UL>>>Pin)) != 0) ? 1 : 0;
+  return ((GPIOx->IDR & (1UL << Pin)) != 0) ? 1 : 0;
 }
 // ADD READ WHEN USB COMMUNICATION WORKS

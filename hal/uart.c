@@ -29,6 +29,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
   switch (huart->Init.Pin) {
   /* USART1 */
   case USART1_Conf0: // TX: PA9 RX: PA10 AF7
+    RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
     txPort = GPIOA;
     txConfig.Pin = GPIO_PIN_9;
     txConfig.AF_Select = 7;
@@ -37,6 +38,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.AF_Select = 7;
     break;
   case USART1_Conf1: // TX: PB6 RX: PB7 AF7
+    RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
     txPort = GPIOB;
     txConfig.Pin = GPIO_PIN_6;
     txConfig.AF_Select = 7;
@@ -46,6 +48,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     break;
   /* USART2 */
   case USART2_Conf0: // TX: PA2  RX: PA3  AF7
+    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
     txPort = GPIOA;
     txConfig.Pin = GPIO_PIN_2;
     txConfig.AF_Select = 7;
@@ -54,6 +57,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.AF_Select = 7;
     break;
   case USART2_Conf1: // TX: PD5  RX: PD6  AF7
+    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
     txPort = GPIOD;
     txConfig.Pin = GPIO_PIN_5;
     txConfig.AF_Select = 7;
@@ -63,6 +67,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     break;
   /* USART3 */
   case USART3_Conf0: // TX: PB10 RX: PB11 AF7
+    RCC->APB1ENR |= RCC_APB1ENR_USART3EN;
     txPort = GPIOB;
     txConfig.Pin = GPIO_PIN_10;
     txConfig.AF_Select = 7;
@@ -71,6 +76,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.AF_Select = 7;
     break;
   case USART3_Conf1: // TX: PC10 RX: PC11 AF7
+    RCC->APB1ENR |= RCC_APB1ENR_USART3EN;
     txPort = GPIOC;
     txConfig.Pin = GPIO_PIN_10;
     txConfig.AF_Select = 7;
@@ -79,6 +85,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.AF_Select = 7;
     break;
   case USART3_Conf2: // TX: PD8  RX: PD9  AF7
+    RCC->APB1ENR |= RCC_APB1ENR_USART3EN;
     txPort = GPIOD;
     txConfig.Pin = GPIO_PIN_8;
     txConfig.AF_Select = 7;
@@ -88,6 +95,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     break;
   /* UART4 */
   case UART4_Conf0: // TX: PA0  RX: PA1  AF8
+    RCC->APB1ENR |= RCC_APB1ENR_UART4EN;
     txPort = GPIOA;
     txConfig.Pin = GPIO_PIN_0;
     txConfig.AF_Select = 8;
@@ -96,6 +104,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.AF_Select = 8;
     break;
   case UART4_Conf1: // TX: PC10 RX: PC11 AF8
+    RCC->APB1ENR |= RCC_APB1ENR_UART4EN;
     txPort = GPIOC;
     txConfig.Pin = GPIO_PIN_10;
     txConfig.AF_Select = 8;
@@ -105,6 +114,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     break;
   /* UART5 */
   case UART5_Conf0: // TX: PC12 RX: PD2  AF8
+    RCC->APB1ENR |= RCC_APB1ENR_UART5EN;
     txPort = GPIOC;
     txConfig.Pin = GPIO_PIN_12;
     txConfig.AF_Select = 8;
@@ -114,6 +124,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     break;
   /* USART6 */
   case USART6_Conf0: // TX: PA11 RX: PA12 AF8
+    RCC->APB2ENR |= RCC_APB2ENR_USART6EN;
     txPort = GPIOA;
     txConfig.Pin = GPIO_PIN_11;
     txConfig.AF_Select = 8;
@@ -122,6 +133,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.AF_Select = 8;
     break;
   case USART6_Conf1: // TX: PC6  RX: PC7  AF8
+    RCC->APB2ENR |= RCC_APB2ENR_USART6EN;
     txPort = GPIOC;
     txConfig.Pin = GPIO_PIN_6;
     txConfig.AF_Select = 8;
@@ -132,9 +144,14 @@ void UART_Init(UART_HandleTypeDef *huart) {
   default:
     return; // Invalid configuration
   }
-
+  // If both pins configured, then enables the gpio pins using the GPIO_Init
+  // Function!
   if (txPort && rxPort) {
     GPIO_Init(txPort, &txConfig);
     GPIO_Init(rxPort, &rxConfig);
   }
+}
+
+void UART_DeInit(UART_HandleTypeDef *huart) {
+  // Need to make a GPIO_DeInit Function...
 }
