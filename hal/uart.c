@@ -150,6 +150,45 @@ void UART_Init(UART_HandleTypeDef *huart) {
     GPIO_Init(txPort, &txConfig);
     GPIO_Init(rxPort, &rxConfig);
   }
+
+  huart->Instance->CR1 &= ~(USART_CR1_UE); // Disables UART for configuration
+
+  huart->Instance->BRR = SystemCoreClock / huart->Init.baud; // sets Baud Rate
+
+  huart->Instance->CR1 &=
+      ~(USART_CR1_M | USART_CR1_PCE |
+        USART_CR1_PS); // Clears word length, parity control, enable, and parity
+                       // selection bits
+
+  huart->Instance->CR2 &= ~(USART_CR2_STOP); // Clears stop bits
+
+  // 0 = 8 bits, 1 = 9 bits
+  if (huart->Init.WordLength == 9) {
+    huart->Instance->CR1 |= USART_CR1_M; // 9-bit word length
+  }
+
+  // Parity Even = 0 Parity Odd = 1
+  if (huart->Init.Parity == 0) {
+    huart->Instance->CR1 |= USART_CR1_PCE; // Just enables parity control
+  } else if (huart->Init.Parity == 1) {
+    huart->Instance->CR1 |=
+        USART_CR1_PCE |
+        USART_CR1_PS; // Enables parity control and puts 1 into the parity bit
+  }
+
+  // 00 = 1 stop bit, 01 = 0.5 stop bit, 10 = 2 stop bits, 11 = 1.5 stop bits
+  huart->Instance->CR2 &= ~(USART_CR2_STOP); // Clears stop bits for setting
+  if (huart->Init.StopBits == USART_STOPBITS_1) {
+    huart->Instance->CR2 &= ~(USART_CR2_STOP_0 | USART_CR2_STOP_1);
+  } else if (huart->Init.StopBits == USART_STOPBITS_0_5) {
+    huart->Instance->CR2 |= USART_CR2_STOP_0;
+  } else if (huart->Init.StopBits == USART_STOPBITS_2) {
+    huart->Instance->CR2 |= USART_CR2_STOP_1;
+  } else if (huart->Init.StopBits == USART_STOPBITS_1_5) {
+    huart->Instance->CR2 |= USART_CR2_STOP_0 | USART_CR2_STOP_1;
+  }
+
+  huart->Instance->CR1 |= USART_CR1_UE; // Finally enables the UART peripherial
 }
 
 void UART_DeInit(UART_HandleTypeDef *huart) {
