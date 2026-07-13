@@ -152,7 +152,8 @@ void UART_Init(UART_HandleTypeDef *huart) {
   }
 
   huart->Instance->CR1 &= ~(USART_CR1_UE); // Disables UART for configuration
-
+  // TODO: Fix baud rate calculation, there are different clocks for different
+  // UARTs
   huart->Instance->BRR = SystemCoreClock / huart->Init.baud; // sets Baud Rate
 
   huart->Instance->CR1 &=
