@@ -37,6 +37,7 @@ typedef enum {
 typedef struct {
   USART_Pin_t Pin;
   uint32_t baud;
+  uint8_t oversampling; // 8 or 16, chosen by USARTx_CR -> usually set to 0
   uint32_t word_length; // 8 or 9, chosen by USARTx_CR1_M
   USART_StopBits_t StopBits;
   uint8_t Parity; // 0 = Even, 1 = Odd
