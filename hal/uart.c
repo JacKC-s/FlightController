@@ -4,7 +4,6 @@
 #include "stm32f446xx.h"
 #include "task.h"
 #include <stdio.h>
-#include <math.h>
 
 #define APB1_CLK 45000000U // APB1 clock speed
 #define APB2_CLK 90000000U // APB2 clock speed
