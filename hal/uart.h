@@ -3,6 +3,7 @@
 
 #include "gpio.h"
 #include "stm32f446xx.h"
+#include <cstdint>
 #include <stdint.h>
 #include <sys/types.h>
 
@@ -28,17 +29,17 @@ typedef enum {
 } USART_Pin_t;
 
 typedef enum {
-  USART_STOPBITS_1,
-  USART_STOPBITS_0_5,
-  USART_STOPBITS_2,
-  USART_STOPBITS_1_5
+  USART_STOPBITS_1 = 0x00,
+  USART_STOPBITS_0_5 = 0x01,
+  USART_STOPBITS_2 = 0x02,
+  USART_STOPBITS_1_5 = 0x03
 } USART_StopBits_t;
 
 typedef struct {
   USART_Pin_t Pin;
   uint32_t baud;
   uint8_t oversampling; // 8 or 16, chosen by USARTx_CR -> usually set to 0
-  uint32_t word_length; // 8 or 9, chosen by USARTx_CR1_M
+  uint8_t wordLength; // 8 or 9, chosen by USARTx_CR1_M -> set to 0 for 8 bit, 1 for 9 bit
   USART_StopBits_t StopBits;
   uint8_t Parity; // 0 = Even, 1 = Odd
 } UART_Config_t;
