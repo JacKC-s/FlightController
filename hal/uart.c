@@ -189,7 +189,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     huart->Instance->BRR = ((div & ~0x0F) >> 1) | ((div & 0x07)); // Set BRR with oversampling by 8
     }
   }
-  }
+  
   // Enable UART and setting word length, stop bits, and parity in the CR1 and CR2 registers
   huart->Instance->CR1 &= ~USART_CR1_UE;
 
