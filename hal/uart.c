@@ -21,9 +21,6 @@ void UART_Init(UART_HandleTypeDef *huart) {
   GPIO_TypeDef *rxPort = NULL;
 
   uint32_t pclk = 0; // Peripheral clock speed, used to calculate the baud rate
-  float_t USARTDIV = 0.0f;
-  float_t mantissa = 0.0f;
-  float_t fraction = 0.0f;
   // Normal configuration for TX and RX
   txConfig.Mode = GPIO_MODE_AF;
   txConfig.OType = GPIO_OTYPE_PP;
@@ -183,29 +180,15 @@ void UART_Init(UART_HandleTypeDef *huart) {
     GPIO_Init(txPort, &txConfig);
     GPIO_Init(rxPort, &rxConfig);
   }
-  // Calculating the BRR -> This section is lazy, I can do this better without using the fpu
+  // Changed to integer math to avoid floating point operations
   if (pclk != 0) {
-    USARTDIV = (float_t)pclk / (8.0f * (float_t)(2 - huart->Init.oversampling) * (float_t)(huart->Init.baud));
-    mantissa = floorf(USARTDIV);
-    if (huart->Init.oversampling == 0) {
-      fraction = roundf((USARTDIV - mantissa) * 16.0f);
-      // Handle overflow carry
-        if (fraction >= 16.0f) {
-            mantissa += 1.0f;
-            fraction = 0.0f;
-        }
-      huart->Instance->BRR = ((uint32_t)mantissa << 4) | ((uint32_t)fraction & 0x0F);
-
-    } else {
-      fraction = roundf((USARTDIV - mantissa) * 8.0f);
-      // Handle overflow carry
-        if (fraction >= 8.0f) {
-            mantissa += 1.0f;
-            fraction = 0.0f;
-        }
-      huart->Instance->BRR = ((uint32_t)mantissa << 4) | ((uint32_t)fraction & 0x07);
-
+    if (oversampling == 0) { // Oversampling by 16
+      huart->Instance->BRR = (pclk + (huart->Init.baud / 2U)) / huart->Init.baud; // Round to nearest integer
+    } else { // Oversampling by 8
+    uint32_t div = (2 * (pclk + (huart->Init.baud / 2U))) / huart->Init.baud; // Round to nearest integer
+    huart->Instance->BRR = ((div & ~0x0F) >> 1) | ((div & 0x07)); // Set BRR with oversampling by 8
     }
+  }
   }
   // Enable UART and setting word length, stop bits, and parity in the CR1 and CR2 registers
   huart->Instance->CR1 &= ~USART_CR1_UE;
