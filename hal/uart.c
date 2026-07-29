@@ -179,9 +179,12 @@ void UART_Init(UART_HandleTypeDef *huart) {
     GPIO_Init(txPort, &txConfig);
     GPIO_Init(rxPort, &rxConfig);
   }
+
+  // Enable UART and setting word length, stop bits, and parity in the CR1 and CR2 registers
+  huart->Instance->CR1 &= ~USART_CR1_UE;
   // Changed to integer math to avoid floating point operations
   if (pclk != 0) {
-    if (oversampling == 0) { // Oversampling by 16
+    if (huart->Init.oversampling == 0) { // Oversampling by 16
       huart->Instance->BRR = (pclk + (huart->Init.baud / 2U)) / huart->Init.baud; // Round to nearest integer
     } else { // Oversampling by 8
     uint32_t div = (2 * (pclk + (huart->Init.baud / 2U))) / huart->Init.baud; // Round to nearest integer
@@ -189,8 +192,6 @@ void UART_Init(UART_HandleTypeDef *huart) {
     }
   }
   
-  // Enable UART and setting word length, stop bits, and parity in the CR1 and CR2 registers
-  huart->Instance->CR1 &= ~USART_CR1_UE;
 
   // Set word length
   huart->Instance->CR1 &= ~(USART_CR1_M); 
@@ -214,14 +215,188 @@ void UART_Init(UART_HandleTypeDef *huart) {
   }
 
   // Enable the UART peripheral
-  huart->Instance->CR1 |= USART_CR1_UE;
+  huart->Instance->CR1 |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
 }
 
 void UART_DeInit(UART_HandleTypeDef *huart) {
-// Complete the init function first!
+
+  GPIO_PinConfig_t txConfig = {0};
+  GPIO_PinConfig_t rxConfig = {0};
+  GPIO_TypeDef *txPort = NULL;
+  GPIO_TypeDef *rxPort = NULL;
+
+  // Zeroing out configuration structs to ensure no residual settings
+
+  switch (huart->Init.Pin) {
+  /* USART1 */
+  case USART1_Conf0: // TX: PA9 RX: PA10 AF7
+    RCC->APB2ENR &= ~RCC_APB2ENR_USART1EN; // Disables the USART1 clock
+    txPort = GPIOA;
+    txConfig.Pin = GPIO_PIN_9;
+    txConfig.Mode = GPIO_MODE_AF;
+    rxPort = GPIOA;
+    rxConfig.Pin = GPIO_PIN_10;
+    rxConfig.Mode = GPIO_MODE_AF;
+    break;
+  case USART1_Conf1: // TX: PB6 RX: PB7 AF7
+    RCC->APB2ENR &= ~RCC_APB2ENR_USART1EN; // Disables the USART1 clock
+    txPort = GPIOB;
+    txConfig.Pin = GPIO_PIN_6;
+    txConfig.Mode = GPIO_MODE_AF;
+    rxPort = GPIOB;
+    rxConfig.Pin = GPIO_PIN_7;
+    rxConfig.Mode = GPIO_MODE_AF;
+    break;
+  /* USART2 */
+  case USART2_Conf0: // TX: PA2  RX: PA3  AF7
+    RCC->APB1ENR &= ~RCC_APB1ENR_USART2EN; // Disables the USART2 clock
+    txPort = GPIOA;
+    txConfig.Pin = GPIO_PIN_2;
+    txConfig.Mode = GPIO_MODE_AF;
+    rxPort = GPIOA;
+    rxConfig.Pin = GPIO_PIN_3;
+    rxConfig.Mode = GPIO_MODE_AF;
+    break;
+  case USART2_Conf1: // TX: PD5  RX: PD6  AF7
+    RCC->APB1ENR &= ~RCC_APB1ENR_USART2EN; // Disables the USART2 clock
+    txPort = GPIOD;
+    txConfig.Pin = GPIO_PIN_5;
+    txConfig.Mode = GPIO_MODE_AF;
+    rxPort = GPIOD;
+    rxConfig.Pin = GPIO_PIN_6;
+    rxConfig.Mode = GPIO_MODE_AF;
+    break;
+  /* USART3 */
+  case USART3_Conf0: // TX: PB10 RX: PB11 AF7
+    RCC->APB1ENR &= ~RCC_APB1ENR_USART3EN; // Disables the USART3 clock
+    txPort = GPIOB;
+    txConfig.Pin = GPIO_PIN_10;
+    txConfig.Mode = GPIO_MODE_AF;
+    rxPort = GPIOB;
+    rxConfig.Pin = GPIO_PIN_11;
+    rxConfig.Mode = GPIO_MODE_AF;
+    break;
+  case USART3_Conf1: // TX: PC10 RX: PC11 AF7
+    RCC->APB1ENR &= ~RCC_APB1ENR_USART3EN; // Disables the USART3 clock
+    txPort = GPIOC;
+    txConfig.Pin = GPIO_PIN_10;
+    txConfig.Mode = GPIO_MODE_AF;
+    rxPort = GPIOC;
+    rxConfig.Pin = GPIO_PIN_11;
+    rxConfig.Mode = GPIO_MODE_AF;
+    break;
+  case USART3_Conf2: // TX: PD8  RX: PD9  AF7
+    RCC->APB1ENR &= ~RCC_APB1ENR_USART3EN; // Disables the USART3 clock
+    txPort = GPIOD;
+    txConfig.Pin = GPIO_PIN_8;    
+    txConfig.Mode = GPIO_MODE_AF;
+    rxPort = GPIOD;
+    rxConfig.Pin = GPIO_PIN_9;
+    rxConfig.Mode = GPIO_MODE_AF;
+    break;
+  /* UART4 */
+  case UART4_Conf0: // TX: PA0  RX: PA1  AF8
+    RCC->APB1ENR &= ~RCC_APB1ENR_UART4EN; // Disables the UART4 clock
+    txPort = GPIOA;
+    txConfig.Pin = GPIO_PIN_0;
+    txConfig.Mode = GPIO_MODE_AF;
+    rxPort = GPIOA;
+    rxConfig.Pin = GPIO_PIN_1;
+    rxConfig.Mode = GPIO_MODE_AF;
+    break;
+  case UART4_Conf1: // TX: PC10 RX: PC11 AF8
+    RCC->APB1ENR &= ~RCC_APB1ENR_UART4EN; // Disables the UART4 clock
+    txPort = GPIOC;
+    txConfig.Pin = GPIO_PIN_10;
+    txConfig.Mode = GPIO_MODE_AF;
+    rxPort = GPIOC;
+    rxConfig.Pin = GPIO_PIN_11;
+    rxConfig.Mode = GPIO_MODE_AF;
+    break;
+  /* UART5 */
+  case UART5_Conf0: // TX: PC12 RX: PD2  AF8
+    RCC->APB1ENR &= ~RCC_APB1ENR_UART5EN; // Disables the UART5 clock
+    txPort = GPIOC;
+    txConfig.Pin = GPIO_PIN_12;
+    txConfig.Mode = GPIO_MODE_AF;
+    rxPort = GPIOD;
+    rxConfig.Pin = GPIO_PIN_2;
+    rxConfig.Mode = GPIO_MODE_AF;
+    break;
+  /* USART6 */
+  case USART6_Conf0: // TX: PA11 RX: PA12 AF8
+    RCC->APB2ENR &= ~RCC_APB2ENR_USART6EN; // Disables the USART6 clock
+    txPort = GPIOA;
+    txConfig.Pin = GPIO_PIN_11;
+    txConfig.Mode = GPIO_MODE_AF;
+    rxPort = GPIOA;
+    rxConfig.Pin = GPIO_PIN_12;
+    rxConfig.Mode = GPIO_MODE_AF;
+    break;
+  case USART6_Conf1: // TX: PC6  RX: PC7  AF8
+    RCC->APB2ENR &= ~RCC_APB2ENR_USART6EN; // Disables the USART6 clock
+    txPort = GPIOC;
+    txConfig.Pin = GPIO_PIN_6;
+    txConfig.Mode = GPIO_MODE_AF;
+    rxPort = GPIOC;
+    rxConfig.Pin = GPIO_PIN_7;
+    rxConfig.Mode = GPIO_MODE_AF;
+    break;
+  default:
+    return; // Invalid configuration
+  }
+  // If both pins configured, then enables the gpio pins using the GPIO_Init Function!
+  if (txPort && rxPort) {
+    GPIO_DeInit(txPort, &txConfig);
+    GPIO_DeInit(rxPort, &rxConfig);
+  }
+
+
+  // Deinitializing the UART peripherals
+  huart->Instance->CR1 &= ~(USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
+
+  huart->Instance->BRR = 0; // Resetting the baud rate register
+
+
+
+  // UnSet word length
+  huart->Instance->CR1 &= ~(USART_CR1_M); 
+
+  // UnSet pairty
+  huart->Instance->CR1 &= ~(USART_CR1_PCE);
+
+  // UnSet oversampling
+  huart->Instance->CR1 &= ~(USART_CR1_OVER8);
+  
+  huart->Instance->CR2 &= ~(USART_CR2_STOP);
+
+  // disable the clock
+  if (!(huart->Init.Pin == UART4_Conf0 || huart->Init.Pin == UART4_Conf1 || huart->Init.Pin == UART5_Conf0)) {
+    huart->Instance->CR2 &= ~USART_CR2_CLKEN;
+  }
+
+
+
 }
 
 
 void Transmit_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size, uint32_t timeout) {
+  
+}
+
+void Transmit_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size) {
+
+}
+void Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size) {
+
+}
+
+uint8_t Recieve_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size, uint32_t timeout) {
+
+}
+uint8_t Recieve_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size) {
+
+}
+uint8_t Recieve_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size) {
   
 }

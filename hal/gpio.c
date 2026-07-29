@@ -76,27 +76,9 @@ void GPIO_TogglePin(GPIO_TypeDef *GPIOx, uint8_t pin) {
 uint8_t GPIO_ReadPin(GPIO_TypeDef *GPIOx, uint8_t Pin) {
   return ((GPIOx->IDR & (1UL << Pin)) != 0) ? 1 : 0;
 }
-void GPIO_DeInit(GPIO_TypeDef *GPIOx, GPIO_PinConfig_t *Config) { //Function initiator
-  // Enables GPIO clocks
-  if (GPIOx == GPIOA) {
-    RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIOAEN); //& ~ (RCC_....)
-  } else if (GPIOx == GPIOB) { //assignment is to make an invert of the  
-    RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIOBEN); //Function goes down the list enabling settings
-  } else if (GPIOx == GPIOC) {
-    RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIOCEN);
-  } else if (GPIOx == GPIOD) {
-    RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIODEN);
-  } else if (GPIOx == GPIOE) {
-    RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIOEEN);
-  } else if (GPIOx == GPIOF) {
-    RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIOFEN);
-  } else if (GPIOx == GPIOG) {
-    RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIOGEN);
-  } else if (GPIOx == GPIOH) {
-    RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIOHEN);
-  } else {
-  }
 
+// Invalid, needs to be fixed -> disables the entire GPIO port, not just the pin. Need to figure out how to disable just one pin
+void GPIO_DeInit(GPIO_TypeDef *GPIOx, GPIO_PinConfig_t *Config) { //Function initiator
   // Get pin
   uint8_t pin = Config->Pin; //unsigned 8-bit integer from 0 to 255, 15 per GPIO
 

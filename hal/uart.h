@@ -3,7 +3,6 @@
 
 #include "gpio.h"
 #include "stm32f446xx.h"
-#include <cstdint>
 #include <stdint.h>
 #include <sys/types.h>
 
