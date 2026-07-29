@@ -68,6 +68,7 @@ typedef struct {
 
 // Function Definitions
 void GPIO_Init(GPIO_TypeDef *GPIOx, GPIO_PinConfig_t *Config);
+void GPIO_DeInit(GPIO_TypeDef *GPIOx, GPIO_PinConfig_t *Config);
 void GPIO_WritePin(GPIO_TypeDef *GPIOx, uint8_t Pin, GPIO_STATE_t State);
 void GPIO_TogglePin(GPIO_TypeDef *GPIOx, uint8_t Pin);
 uint8_t GPIO_ReadPin(GPIO_TypeDef *GPIOx, uint8_t Pin);

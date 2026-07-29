@@ -8,6 +8,12 @@
 #define APB1_CLK 45000000U // APB1 clock speed
 #define APB2_CLK 90000000U // APB2 clock speed
 
+static UART_HandleTypeDef *g_huart1 = NULL;
+static UART_HandleTypeDef *g_huart2 = NULL;
+static UART_HandleTypeDef *g_huart3 = NULL;
+static UART_HandleTypeDef *g_huart4 = NULL;
+static UART_HandleTypeDef *g_huart5 = NULL;
+static UART_HandleTypeDef *g_huart6 = NULL;
 
 // Initialization function uses gpio driver
 
@@ -34,7 +40,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
   switch (huart->Init.Pin) {
   /* USART1 */
   case USART1_Conf0: // TX: PA9 RX: PA10 AF7
-    RCC->APB2ENR |= RCC_APB2ENR_GPIOAEN; // Enables the USART1 clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN; // Enables the GPIOA clock
     RCC->APB2ENR |= RCC_APB2ENR_USART1EN; // Enables the USART1 clock
     txPort = GPIOA;
     txConfig.Pin = GPIO_PIN_9;
@@ -43,9 +49,11 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.Pin = GPIO_PIN_10;
     rxConfig.AF_Select = 7;
     pclk = APB2_CLK; // Set peripheral clock speed for USART1
+    g_huart1 = huart; // Store the handle for USART1
+    NVIC_EnableIRQ(USART1_IRQn); // Enable the USART1 interrupt in the NVIC
     break;
   case USART1_Conf1: // TX: PB6 RX: PB7 AF7
-    RCC->APB2ENR |= RCC_APB2ENR_GPIOBEN; // Enables the USART1 clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN; // Enables the GPIOB clock
     RCC->APB2ENR |= RCC_APB2ENR_USART1EN; // Enables the USART1 clock
     txPort = GPIOB;
     txConfig.Pin = GPIO_PIN_6;
@@ -54,10 +62,12 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.Pin = GPIO_PIN_7;
     rxConfig.AF_Select = 7;
     pclk = APB2_CLK; // Set peripheral clock speed for USART1
+    g_huart1 = huart; // Store the handle for USART1
+    NVIC_EnableIRQ(USART1_IRQn);
     break;
   /* USART2 */
   case USART2_Conf0: // TX: PA2  RX: PA3  AF7
-    RCC->APB1ENR |= RCC_APB1ENR_GPIOAEN; // Enables the USART2 clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN; // Enables the GPIOA clock
     RCC->APB1ENR |= RCC_APB1ENR_USART2EN; // Enables the USART2 clock
     txPort = GPIOA;
     txConfig.Pin = GPIO_PIN_2;
@@ -66,9 +76,11 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.Pin = GPIO_PIN_3;
     rxConfig.AF_Select = 7;
     pclk = APB1_CLK; // Set peripheral clock speed for USART2
+    g_huart2 = huart; // Store the handle for USART2
+    NVIC_EnableIRQ(USART2_IRQn);
     break;
   case USART2_Conf1: // TX: PD5  RX: PD6  AF7
-    RCC->APB1ENR |= RCC_APB1ENR_GPIODEN; // Enables the USART2 clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN; // Enables the GPIOD clock
     RCC->APB1ENR |= RCC_APB1ENR_USART2EN; // Enables the USART2 clock
     txPort = GPIOD;
     txConfig.Pin = GPIO_PIN_5;
@@ -77,10 +89,12 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.Pin = GPIO_PIN_6;
     rxConfig.AF_Select = 7;
     pclk = APB1_CLK; // Set peripheral clock speed for USART2
+    g_huart2 = huart; // Store the handle for USART2
+    NVIC_EnableIRQ(USART2_IRQn);
     break;
   /* USART3 */
   case USART3_Conf0: // TX: PB10 RX: PB11 AF7
-    RCC->APB1ENR |= RCC_APB1ENR_GPIOBEN; // Enables the USART3 clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN; // Enables the GPIOB clock
     RCC->APB1ENR |= RCC_APB1ENR_USART3EN; // Enables the USART3 clock
     txPort = GPIOB;
     txConfig.Pin = GPIO_PIN_10;
@@ -89,9 +103,11 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.Pin = GPIO_PIN_11;
     rxConfig.AF_Select = 7;
     pclk = APB1_CLK; // Set peripheral clock speed for USART3
+    g_huart3 = huart; // Store the handle for USART3
+    NVIC_EnableIRQ(USART3_IRQn);
     break;
   case USART3_Conf1: // TX: PC10 RX: PC11 AF7
-    RCC->APB1ENR |= RCC_APB1ENR_GPIOCEN; // Enables the USART3 clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN; // Enables the GPIOC clock
     RCC->APB1ENR |= RCC_APB1ENR_USART3EN; // Enables the USART3 clock
     txPort = GPIOC;
     txConfig.Pin = GPIO_PIN_10;
@@ -100,9 +116,11 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.Pin = GPIO_PIN_11;
     rxConfig.AF_Select = 7;
     pclk = APB1_CLK; // Set peripheral clock speed for USART3
+    g_huart3 = huart; // Store the handle for USART3
+    NVIC_EnableIRQ(USART3_IRQn);
     break;
   case USART3_Conf2: // TX: PD8  RX: PD9  AF7
-    RCC->APB1ENR |= RCC_APB1ENR_GPIODEN; // Enables the USART3 clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN; // Enables the GPIOD clock
     RCC->APB1ENR |= RCC_APB1ENR_USART3EN; // Enables the USART3 clock
     txPort = GPIOD;
     txConfig.Pin = GPIO_PIN_8;
@@ -111,10 +129,12 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.Pin = GPIO_PIN_9;
     rxConfig.AF_Select = 7;
     pclk = APB1_CLK; // Set peripheral clock speed for USART3
+    g_huart3 = huart; // Store the handle for USART3
+    NVIC_EnableIRQ(USART3_IRQn);
     break;
   /* UART4 */
   case UART4_Conf0: // TX: PA0  RX: PA1  AF8
-    RCC->APB1ENR |= RCC_APB1ENR_GPIOAEN; // Enables the UART4 clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN; // Enables the GPIOA clock
     RCC->APB1ENR |= RCC_APB1ENR_UART4EN; // Enables the UART4 clock
     txPort = GPIOA;
     txConfig.Pin = GPIO_PIN_0;
@@ -123,9 +143,11 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.Pin = GPIO_PIN_1;
     rxConfig.AF_Select = 8;
     pclk = APB1_CLK; // Set peripheral clock speed for UART4
+    g_huart4 = huart; // Store the handle for UART4
+    NVIC_EnableIRQ(UART4_IRQn);
     break;
   case UART4_Conf1: // TX: PC10 RX: PC11 AF8
-    RCC->APB1ENR |= RCC_APB1ENR_GPIOCEN; // Enables the UART4 clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN; // Enables the GPIOC clock
     RCC->APB1ENR |= RCC_APB1ENR_UART4EN; // Enables the UART4 clock
     txPort = GPIOC;
     txConfig.Pin = GPIO_PIN_10;
@@ -134,11 +156,13 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.Pin = GPIO_PIN_11;
     rxConfig.AF_Select = 8;
     pclk = APB1_CLK; // Set peripheral clock speed for UART4
+    g_huart4 = huart; // Store the handle for UART4
+    NVIC_EnableIRQ(UART4_IRQn);
     break;
   /* UART5 */
   case UART5_Conf0: // TX: PC12 RX: PD2  AF8
-    RCC->APB1ENR |= RCC_APB1ENR_GPIOCEN; // Enables the UART5 clock
-    RCC->APB1ENR |= RCC_APB1ENR_GPIODEN; // Enables the UART5 clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN; // Enables the GPIOC clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN; // Enables the GPIOD clock
     RCC->APB1ENR |= RCC_APB1ENR_UART5EN; // Enables the UART5 clock
     txPort = GPIOC;
     txConfig.Pin = GPIO_PIN_12;
@@ -147,10 +171,12 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.Pin = GPIO_PIN_2;
     rxConfig.AF_Select = 8;
     pclk = APB1_CLK; // Set peripheral clock speed for UART5
+    g_huart5 = huart; // Store the handle for UART5
+    NVIC_EnableIRQ(UART5_IRQn);
     break;
   /* USART6 */
   case USART6_Conf0: // TX: PA11 RX: PA12 AF8
-    RCC->APB2ENR |= RCC_APB2ENR_GPIOAEN; // Enables the USART6 clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN; // Enables the GPIOA clock
     RCC->APB2ENR |= RCC_APB2ENR_USART6EN; // Enables the USART6 clock
     txPort = GPIOA;
     txConfig.Pin = GPIO_PIN_11;
@@ -159,9 +185,11 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.Pin = GPIO_PIN_12;
     rxConfig.AF_Select = 8;
     pclk = APB2_CLK; // Set peripheral clock speed for USART6
+    g_huart6 = huart; // Store the handle for USART6
+    NVIC_EnableIRQ(USART6_IRQn);
     break;
   case USART6_Conf1: // TX: PC6  RX: PC7  AF8
-    RCC->APB2ENR |= RCC_APB2ENR_GPIOCEN; // Enables the USART6 clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN; // Enables the GPIOC clock
     RCC->APB2ENR |= RCC_APB2ENR_USART6EN; // Enables the USART6 clock  
     txPort = GPIOC;
     txConfig.Pin = GPIO_PIN_6;
@@ -170,6 +198,8 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.Pin = GPIO_PIN_7;
     rxConfig.AF_Select = 8;
     pclk = APB2_CLK; // Set peripheral clock speed for USART6
+    g_huart6 = huart; // Store the handle for USART6
+    NVIC_EnableIRQ(USART6_IRQn);
     break;
   default:
     return; // Invalid configuration
@@ -424,8 +454,7 @@ USART_Status_t Transmit_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData, uin
   return USART_STATUS_OK;
 }
 
-
-// Need to implement the UART IRQ handler in the main interrupt vector table and call this function from there
+// Functional
 void UART_IRQHandler(UART_HandleTypeDef *huart) {
   if ((huart->Instance->SR & USART_SR_TXE) && (huart->Instance->CR1 & USART_CR1_TXEIE)) {
     if (huart->txTranRemain > 0) {
@@ -454,3 +483,41 @@ uint8_t Recieve_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Si
 uint8_t Recieve_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size) {
 
 }
+
+
+// Vector table interrupts translated into universal function call to UART_IRQHandler
+void USART1_IRQHandler(void) {
+  if (g_huart1 != NULL) {
+        UART_IRQHandler(g_huart1);
+      }
+  }
+
+void USART2_IRQHandler(void) {
+  if (g_huart2 != NULL) {
+        UART_IRQHandler(g_huart2);
+      }
+  }
+
+void USART3_IRQHandler(void) {
+  if (g_huart3 != NULL) {
+        UART_IRQHandler(g_huart3);
+      }
+  }
+
+void UART4_IRQHandler(void) {
+  if (g_huart4 != NULL) {
+        UART_IRQHandler(g_huart4);
+      }
+  }
+
+void UART5_IRQHandler(void) {
+  if (g_huart5 != NULL) {
+        UART_IRQHandler(g_huart5);
+      }
+  }
+
+void USART6_IRQHandler(void) {
+  if (g_huart6 != NULL) {
+        UART_IRQHandler(g_huart6);
+      }
+  }
