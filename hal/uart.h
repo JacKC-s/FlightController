@@ -34,6 +34,12 @@ typedef enum {
   USART_STOPBITS_1_5 = 0x03
 } USART_StopBits_t;
 
+typedef enum {
+  USART_STATUS_OK = 0x00,
+  USART_STATUS_ERROR = 0x01,
+  USART_STATUS_TIMEOUT = 0x02
+} USART_Status_t;
+
 typedef struct {
   USART_Pin_t Pin;
   uint32_t baud;
@@ -63,11 +69,11 @@ void UART_Init(UART_HandleTypeDef *huart);
 void UART_DeInit(UART_HandleTypeDef *huart);
 
 // TX functions
-void Transmit_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size,
+USART_Status_t Transmit_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size,
                    uint32_t timeout); // Most likely to not be used
-void Transmit_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData,
+USART_Status_t Transmit_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData,
                         uint16_t Size);
-void Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size);
+USART_Status_t Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size);
 
 // RX functions
 uint8_t Recieve_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size,

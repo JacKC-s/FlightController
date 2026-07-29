@@ -357,8 +357,6 @@ void UART_DeInit(UART_HandleTypeDef *huart) {
 
   huart->Instance->BRR = 0; // Resetting the baud rate register
 
-
-
   // UnSet word length
   huart->Instance->CR1 &= ~(USART_CR1_M); 
 
@@ -375,19 +373,75 @@ void UART_DeInit(UART_HandleTypeDef *huart) {
     huart->Instance->CR2 &= ~USART_CR2_CLKEN;
   }
 
-
-
 }
 
 
-void Transmit_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size, uint32_t timeout) {
-  
+USART_Status_t Transmit_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size, uint32_t timeout) {
+  if (huart == NULL || pData == NULL || Size == 0) {
+    return USART_STATUS_ERROR; // Invalid parameters
+  }
+
+  for (uint16_t i = 0; i < Size; i++) {
+    // Wait until TXE (Transmit Data Register Empty) flag is set
+    uint32_t startTick = xTaskGetTickCount(); // cool use of FreeRTOS tick count for timeout
+    while (!(huart->Instance->SR & USART_SR_TXE)) {
+      if ((xTaskGetTickCount() - startTick) > timeout) {
+        return USART_STATUS_TIMEOUT; // Timeout occurred
+      }
+    }
+
+    // Write data to the data register -> this causes the data to be transmitted
+    huart->Instance->DR = pData[i];
+  }
+
+  // Wait until TC (Transmission Complete) flag is set
+  uint32_t startTick = xTaskGetTickCount();
+  while (!(huart->Instance->SR & USART_SR_TC)) {
+    if ((xTaskGetTickCount() - startTick) > timeout) {
+      return USART_STATUS_TIMEOUT; // Timeout occurred
+    }
+
+}
+return USART_STATUS_OK;
 }
 
-void Transmit_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size) {
+USART_Status_t Transmit_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size) {
+  if (huart == NULL || pData == NULL || Size == 0) {
+    return USART_STATUS_ERROR; // Invalid parameters
+  }
 
+  if (huart->txTranRemain != 0) {
+    return USART_STATUS_ERROR; // Transmission already in progress
+  }
+
+  huart->pTxBuff = pData;
+  huart->txTranSize = Size;
+  huart->txTranRemain = Size;
+
+  // Enable the TXE interrupt
+  huart->Instance->CR1 |= USART_CR1_TXEIE;
+
+  return USART_STATUS_OK;
 }
-void Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size) {
+
+
+// Need to implement the UART IRQ handler in the main interrupt vector table and call this function from there
+void UART_IRQHandler(UART_HandleTypeDef *huart) {
+  if ((huart->Instance->SR & USART_SR_TXE) && (huart->Instance->CR1 & USART_CR1_TXEIE)) {
+    if (huart->txTranRemain > 0) {
+      // Write data to the data register
+      huart->Instance->DR = *(huart->pTxBuff);
+      huart->pTxBuff++;
+      huart->txTranRemain--;
+    } else {
+      // Transmission complete, disable TXE interrupt
+      huart->Instance->CR1 &= ~USART_CR1_TXEIE;
+    }
+
+  }
+}
+
+USART_Status_t Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size) {
 
 }
 
@@ -398,5 +452,5 @@ uint8_t Recieve_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Si
 
 }
 uint8_t Recieve_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size) {
-  
+
 }
