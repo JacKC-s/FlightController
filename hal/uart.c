@@ -470,6 +470,8 @@ void UART_IRQHandler(UART_HandleTypeDef *huart) {
   }
 }
 
+// TODO: Change HUART to contain dma settings, then add them to the init function.
+
 USART_Status_t Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size) {
 
 }
