@@ -5,12 +5,12 @@ MEMORY{
 }
 _estack = ORIGIN(sram) + LENGTH(sram);
 
-/*Didnt link the C libraries*/
+/*Didnt link the C libraries */
 SECTIONS {
     .vectors : {KEEP(*(.isr_vector))} > flash
     .text : {
         *(.text*)
-        KEEP(*(.init)) // C libraries linked
+        KEEP(*(.init)) /* C libraries linked */
         KEEP(*(.fini))
     } > flash 
 
