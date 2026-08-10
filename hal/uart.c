@@ -16,9 +16,6 @@ static UART_HandleTypeDef *g_huart4 = NULL;
 static UART_HandleTypeDef *g_huart5 = NULL;
 static UART_HandleTypeDef *g_huart6 = NULL;
 
-DMA_Config_t hdma_tx = {0};
-DMA_Config_t hdma_rx = {0};
-
 // Initialization function uses gpio driver
 
 void UART_Init(UART_HandleTypeDef *huart) {
@@ -70,7 +67,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     if (huart->Init.DMA_Enable) { 
       huart->Instance->CR3 |= USART_CR3_DMAT;
       // TX
-      hdma_tx = (DMA_Config_t){
+      huart->hdma_tx = (DMA_Config_t){
           .Instance = DMA2,
           .Str_Instance = DMA2_Stream7,
           .Channel = 4,
@@ -90,7 +87,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
       };
 
       // RX
-      hdma_rx = (DMA_Config_t){
+      huart->hdma_rx = (DMA_Config_t){
           .Instance = DMA2,
           .Str_Instance = DMA2_Stream2,
           .Channel = 4,
@@ -108,8 +105,8 @@ void UART_Init(UART_HandleTypeDef *huart) {
           .tran_complete_interrupt = true,
           .tran_error_interrupt = true
       };
-      DMA_Init(&hdma_tx);
-      DMA_Init(&hdma_rx);
+      DMA_Init(&huart->hdma_tx);
+      DMA_Init(&huart->hdma_rx);
     }
     NVIC_EnableIRQ(USART1_IRQn);
     break;
@@ -140,7 +137,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     g_huart2 = huart; // Store the handle for USART2
     if (huart->Init.DMA_Enable) {
       huart->Instance->CR3 |= USART_CR3_DMAT;
-      hdma_tx = (DMA_Config_t){
+      huart->hdma_tx = (DMA_Config_t){
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream6,
           .Channel = 4,
@@ -159,7 +156,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
           .tran_error_interrupt = true
       };
 
-      hdma_rx = (DMA_Config_t){
+      huart->hdma_rx = (DMA_Config_t){
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream5,
           .Channel = 4,
@@ -177,8 +174,8 @@ void UART_Init(UART_HandleTypeDef *huart) {
           .tran_complete_interrupt = true,
           .tran_error_interrupt = true
       };
-      DMA_Init(&hdma_tx);
-      DMA_Init(&hdma_rx);
+      DMA_Init(&huart->hdma_tx);
+      DMA_Init(&huart->hdma_rx);
     }
     NVIC_EnableIRQ(USART2_IRQn);
     break;
@@ -222,7 +219,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     g_huart3 = huart; // Store the handle for USART3
     if (huart->Init.DMA_Enable) {
       huart->Instance->CR3 |= USART_CR3_DMAT;
-      hdma_tx = (DMA_Config_t){
+      huart->hdma_tx = (DMA_Config_t){
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream3,
           .Channel = 4,
@@ -241,7 +238,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
           .tran_error_interrupt = true
       };
 
-      hdma_rx = (DMA_Config_t){
+      huart->hdma_rx = (DMA_Config_t){
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream1,
           .Channel = 4,
@@ -259,8 +256,8 @@ void UART_Init(UART_HandleTypeDef *huart) {
           .tran_complete_interrupt = true,
           .tran_error_interrupt = true
       };
-      DMA_Init(&hdma_tx);
-      DMA_Init(&hdma_rx);
+      DMA_Init(&huart->hdma_tx);
+      DMA_Init(&huart->hdma_rx);
     }
     NVIC_EnableIRQ(USART3_IRQn);
     break;
@@ -291,7 +288,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     g_huart4 = huart; // Store the handle for UART4
     if (huart->Init.DMA_Enable) {
       huart->Instance->CR3 |= USART_CR3_DMAT;
-      hdma_tx = (DMA_Config_t){
+      huart->hdma_tx = (DMA_Config_t){
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream4,
           .Channel = 4,
@@ -310,7 +307,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
           .tran_error_interrupt = true
       };
 
-      hdma_rx = (DMA_Config_t) {
+      huart->hdma_rx = (DMA_Config_t) {
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream2,
           .Channel = 4,
@@ -328,8 +325,8 @@ void UART_Init(UART_HandleTypeDef *huart) {
           .tran_complete_interrupt = true,
           .tran_error_interrupt = true
       };
-      DMA_Init(&hdma_tx);
-      DMA_Init(&hdma_rx);
+      DMA_Init(&huart->hdma_tx);
+      DMA_Init(&huart->hdma_rx);
     }
     NVIC_EnableIRQ(UART4_IRQn);
     break;
@@ -348,7 +345,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     g_huart5 = huart; // Store the handle for UART5
     if (huart->Init.DMA_Enable) {
       huart->Instance->CR3 |= USART_CR3_DMAT;
-      hdma_tx = (DMA_Config_t){
+      huart->hdma_tx = (DMA_Config_t){
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream7,
           .Channel = 4,
@@ -367,7 +364,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
           .tran_error_interrupt = true
       };
 
-      hdma_rx = (DMA_Config_t) {
+      huart->hdma_rx = (DMA_Config_t) {
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream0,
           .Channel = 4,
@@ -385,8 +382,8 @@ void UART_Init(UART_HandleTypeDef *huart) {
           .tran_complete_interrupt = true,
           .tran_error_interrupt = true
       };
-      DMA_Init(&hdma_tx);
-      DMA_Init(&hdma_rx);
+      DMA_Init(&huart->hdma_tx);
+      DMA_Init(&huart->hdma_rx);
     }
     NVIC_EnableIRQ(UART5_IRQn);
     break;
@@ -417,7 +414,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     g_huart6 = huart; // Store the handle for USART6
     if (huart->Init.DMA_Enable) {
       huart->Instance->CR3 |= USART_CR3_DMAT;
-      hdma_tx = (DMA_Config_t){
+      huart->hdma_tx = (DMA_Config_t){
           .Instance = DMA2,
           .Str_Instance = DMA2_Stream6,
           .Channel = 5,
@@ -436,7 +433,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
           .tran_error_interrupt = true
       };
 
-      hdma_rx = (DMA_Config_t){
+      huart->hdma_rx = (DMA_Config_t){
           .Instance = DMA2,
           .Str_Instance = DMA2_Stream1,
           .Channel = 5,
@@ -454,8 +451,8 @@ void UART_Init(UART_HandleTypeDef *huart) {
           .tran_complete_interrupt = true,
           .tran_error_interrupt = true
       };
-      DMA_Init(&hdma_tx);
-      DMA_Init(&hdma_rx);
+      DMA_Init(&huart->hdma_tx);
+      DMA_Init(&huart->hdma_rx);
     }
     NVIC_EnableIRQ(USART6_IRQn);
     break;
@@ -730,23 +727,59 @@ void UART_IRQHandler(UART_HandleTypeDef *huart) {
 
 // DMA driver is WIP
 USART_Status_t Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size) {
-  //TODO: Implement DMA flags clearing before reuse
   if (huart == NULL || pData == NULL || Size == 0) {
     return USART_STATUS_ERROR; // Invalid parameters  
+  }
+
+  if ((huart->txTranRemain != 0) || (huart->hdma_tx.Str_Instance->CR & DMA_SxCR_EN)) {
+    return USART_STATUS_ERROR; // Transmission already in progress
+  }
+
+  // Clearing any pending DMA flags before starting a new transfer.
+  if (huart->hdma_tx.Str_Instance == DMA1_Stream0 || huart->hdma_tx.Str_Instance == DMA2_Stream0) {
+    huart->hdma_tx.Instance->LIFCR = DMA_LIFCR_CFEIF0 | DMA_LIFCR_CDMEIF0 |
+                                    DMA_LIFCR_CTEIF0 | DMA_LIFCR_CHTIF0 |
+                                    DMA_LIFCR_CTCIF0;
+  } else if (huart->hdma_tx.Str_Instance == DMA1_Stream1 || huart->hdma_tx.Str_Instance == DMA2_Stream1) {
+    huart->hdma_tx.Instance->LIFCR = DMA_LIFCR_CFEIF1 | DMA_LIFCR_CDMEIF1 |
+                              DMA_LIFCR_CTEIF1 | DMA_LIFCR_CHTIF1 |
+                              DMA_LIFCR_CTCIF1;
+  } else if (huart->hdma_tx.Str_Instance == DMA1_Stream2 || huart->hdma_tx.Str_Instance == DMA2_Stream2) {
+    huart->hdma_tx.Instance->LIFCR = DMA_LIFCR_CFEIF2 | DMA_LIFCR_CDMEIF2 |
+                              DMA_LIFCR_CTEIF2 | DMA_LIFCR_CHTIF2 |
+                              DMA_LIFCR_CTCIF2;
+  } else if (huart->hdma_tx.Str_Instance == DMA1_Stream3 || huart->hdma_tx.Str_Instance == DMA2_Stream3) {
+    huart->hdma_tx.Instance->LIFCR = DMA_LIFCR_CFEIF3 | DMA_LIFCR_CDMEIF3 |
+                              DMA_LIFCR_CTEIF3 | DMA_LIFCR_CHTIF3 |
+                              DMA_LIFCR_CTCIF3;
+  } else if (huart->hdma_tx.Str_Instance == DMA1_Stream4 || huart->hdma_tx.Str_Instance == DMA2_Stream4) {
+    huart->hdma_tx.Instance->HIFCR = DMA_HIFCR_CFEIF4 | DMA_HIFCR_CDMEIF4 |
+                              DMA_HIFCR_CTEIF4 | DMA_HIFCR_CHTIF4 |
+                              DMA_HIFCR_CTCIF4;
+  } else if (huart->hdma_tx.Str_Instance == DMA1_Stream5 || huart->hdma_tx.Str_Instance == DMA2_Stream5) {
+    huart->hdma_tx.Instance->HIFCR = DMA_HIFCR_CFEIF5 | DMA_HIFCR_CDMEIF5 |
+                              DMA_HIFCR_CTEIF5 | DMA_HIFCR_CHTIF5 |
+                              DMA_HIFCR_CTCIF5;
+  } else if (huart->hdma_tx.Str_Instance == DMA1_Stream6 || huart->hdma_tx.Str_Instance == DMA2_Stream6) {
+    huart->hdma_tx.Instance->HIFCR = DMA_HIFCR_CFEIF6 | DMA_HIFCR_CDMEIF6 |
+                              DMA_HIFCR_CTEIF6 | DMA_HIFCR_CHTIF6 |
+                              DMA_HIFCR_CTCIF6;
+  } else if (huart->hdma_tx.Str_Instance == DMA1_Stream7 || huart->hdma_tx.Str_Instance == DMA2_Stream7) {
+    huart->hdma_tx.Instance->HIFCR = DMA_HIFCR_CFEIF7 | DMA_HIFCR_CDMEIF7 |
+                              DMA_HIFCR_CTEIF7 | DMA_HIFCR_CHTIF7 |
+                              DMA_HIFCR_CTCIF7;
+  } else {
+    return USART_STATUS_ERROR; // Invalid DMA stream
   }
 
   huart->pTxBuff = pData;
   huart->txTranSize = Size;
   huart->txTranRemain = Size;
 
-  if ((huart->txTranRemain != 0) || (hdma_tx.Str_Instance->CR & DMA_SxCR_EN)) {
-    return USART_STATUS_ERROR; // Transmission already in progress
-  }
-
-  hdma_tx.tran_count = Size; // Set the transfer count for DMA
-  hdma_tx.pMemAddress = (void *)pData; // Set the memory address for DMA transfer
-  DMA_Init(&hdma_tx); // Re-initialize the DMA with updated parameters
-  DMA_Start(&hdma_tx); // Start the DMA transfer
+  huart->hdma_tx.tran_count = Size; // Set the transfer count for DMA
+  huart->hdma_tx.pMemAddress = (void *)pData; // Set the memory address for DMA transfer
+  DMA_Init(&huart->hdma_tx); // Re-initialize the DMA with updated parameters
+  DMA_Start(&huart->hdma_tx); // Start the DMA transfer
   // TODO: Implement a mechanism to wait for DMA transfer completion or handle it via interrupt
   return USART_STATUS_OK;
 }

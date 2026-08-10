@@ -2,6 +2,7 @@
 #define UART_H
 
 #include "gpio.h"
+#include "dma.h"
 #include "stm32f446xx.h"
 #include <stdint.h>
 #include <sys/types.h>
@@ -61,6 +62,8 @@ typedef struct {
   uint8_t *pRxBuff;
   uint16_t rxTranSize;
   uint16_t rxTranRemain;
+  DMA_Config_t hdma_tx; // DMA config for TX
+  DMA_Config_t hdma_rx; // DMA config for RX
 } UART_HandleTypeDef;
 
 /*Everything under here is non functional yet. Need to learn more about UART.*/
