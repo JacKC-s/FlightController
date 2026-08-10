@@ -47,6 +47,7 @@ typedef struct {
   uint8_t wordLength; // 8 or 9, chosen by USARTx_CR1_M -> set to 0 for 8 bit, 1 for 9 bit
   USART_StopBits_t StopBits;
   uint8_t Parity; // 0 = Even, 1 = Odd
+  uint8_t DMA_Enable; // 0 = Disable, 1 = Enable
 } UART_Config_t;
 
 typedef struct {

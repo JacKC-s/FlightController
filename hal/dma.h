@@ -2,6 +2,7 @@
 #define DMA_H
 
 #include "stm32f446xx.h"
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -42,14 +43,15 @@ typedef enum {
 
 
 typedef struct {
-    DMA_TypeDef *Instance; // Pointer to the actual DMA base address
+    DMA_TypeDef *Instance; 
     uint8_t Channel; // DMA channel number
+    DMA_Stream_TypeDef *Str_Instance; // Pointer to the actual DMA stream.
     DMA_Priority_t Priority; // Priority level of the DMA stream
     DMA_Direction_t Direction; // Direction of data transfer
     DMA_Mem_Size_t memSize; // Memory data size
     DMA_Periph_Size_t periSize; // Peripheral data size
     DMA_Mode_t Mode; // Mode of operation (normal or circular)
-    uint8_t tran_count;
+    uint16_t tran_count;
 
     volatile void *pPeriphAddress;
     void *pMemAddress;
@@ -68,3 +70,5 @@ void DMA_Start(DMA_Config_t *hdma);
 void DMA_Stop(DMA_Config_t *hdma);
 
 void DMA_IRQHandler(DMA_Config_t *hdma);
+
+#endif

@@ -3,6 +3,7 @@
 #include "gpio.h"
 #include "stm32f446xx.h"
 #include "task.h"
+#include "dma.h"
 #include <stdio.h>
 
 #define APB1_CLK 45000000U // APB1 clock speed
@@ -14,6 +15,9 @@ static UART_HandleTypeDef *g_huart3 = NULL;
 static UART_HandleTypeDef *g_huart4 = NULL;
 static UART_HandleTypeDef *g_huart5 = NULL;
 static UART_HandleTypeDef *g_huart6 = NULL;
+
+DMA_Config_t hdma_tx = {0};
+DMA_Config_t hdma_rx = {0};
 
 // Initialization function uses gpio driver
 
@@ -63,6 +67,50 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.AF_Select = 7;
     pclk = APB2_CLK; // Set peripheral clock speed for USART1
     g_huart1 = huart; // Store the handle for USART1
+    if (huart->Init.DMA_Enable) { 
+      huart->Instance->CR3 |= USART_CR3_DMAT;
+      // TX
+      hdma_tx = (DMA_Config_t){
+          .Instance = DMA2,
+          .Str_Instance = DMA2_Stream7,
+          .Channel = 4,
+          .Priority = DMA_PRIORITY_HIGH, // subject to change.
+          .Direction = MEMORY_TO_PERIPHERAL,
+          .memSize = DMA_MEM_SIZE_8BIT,
+          .periSize = DMA_PERIPH_SIZE_8BIT,
+          .Mode = DMA_MODE_NORMAL,
+          .tran_count = huart->txTranSize,
+          .pPeriphAddress = (volatile void *)&huart->Instance->DR,
+          .pMemAddress = (void *)huart->pTxBuff,
+          .peripheralInc = false,
+          .memoryInc = true,
+          .half_tran_interrupt = false,
+          .tran_complete_interrupt = true,
+          .tran_error_interrupt = true
+      };
+
+      // RX
+      hdma_rx = (DMA_Config_t){
+          .Instance = DMA2,
+          .Str_Instance = DMA2_Stream2,
+          .Channel = 4,
+          .Priority = DMA_PRIORITY_HIGH,
+          .Direction = PERIPHERAL_TO_MEMORY,
+          .memSize = DMA_MEM_SIZE_8BIT,
+          .periSize = DMA_PERIPH_SIZE_8BIT,
+          .Mode = DMA_MODE_NORMAL,
+          .tran_count = huart->rxTranSize,
+          .pPeriphAddress = (volatile void *)&huart->Instance->DR, // Pointer to the peripheral
+          .pMemAddress = (void *)huart->pRxBuff, // Pointer to the memory buffer
+          .peripheralInc = false,
+          .memoryInc = true,
+          .half_tran_interrupt = false,
+          .tran_complete_interrupt = true,
+          .tran_error_interrupt = true
+      };
+      DMA_Init(&hdma_tx);
+      DMA_Init(&hdma_rx);
+    }
     NVIC_EnableIRQ(USART1_IRQn);
     break;
   /* USART2 */
@@ -90,6 +138,48 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.AF_Select = 7;
     pclk = APB1_CLK; // Set peripheral clock speed for USART2
     g_huart2 = huart; // Store the handle for USART2
+    if (huart->Init.DMA_Enable) {
+      huart->Instance->CR3 |= USART_CR3_DMAT;
+      hdma_tx = (DMA_Config_t){
+          .Instance = DMA1,
+          .Str_Instance = DMA1_Stream6,
+          .Channel = 4,
+          .Priority = DMA_PRIORITY_HIGH,
+          .Direction = MEMORY_TO_PERIPHERAL,
+          .memSize = DMA_MEM_SIZE_8BIT,
+          .periSize = DMA_PERIPH_SIZE_8BIT,
+          .Mode = DMA_MODE_NORMAL,
+          .tran_count = huart->txTranSize,
+          .pPeriphAddress = (volatile void *)&huart->Instance->DR,
+          .pMemAddress = (void *)huart->pTxBuff,
+          .peripheralInc = false,
+          .memoryInc = true,
+          .half_tran_interrupt = false,
+          .tran_complete_interrupt = true,
+          .tran_error_interrupt = true
+      };
+
+      hdma_rx = (DMA_Config_t){
+          .Instance = DMA1,
+          .Str_Instance = DMA1_Stream5,
+          .Channel = 4,
+          .Priority = DMA_PRIORITY_HIGH,
+          .Direction = PERIPHERAL_TO_MEMORY,
+          .memSize = DMA_MEM_SIZE_8BIT,
+          .periSize = DMA_PERIPH_SIZE_8BIT,
+          .Mode = DMA_MODE_NORMAL,
+          .tran_count = huart->rxTranSize,
+          .pPeriphAddress = (volatile void *)&huart->Instance->DR,
+          .pMemAddress = (void *)huart->pRxBuff,
+          .peripheralInc = false,
+          .memoryInc = true,
+          .half_tran_interrupt = false,
+          .tran_complete_interrupt = true,
+          .tran_error_interrupt = true
+      };
+      DMA_Init(&hdma_tx);
+      DMA_Init(&hdma_rx);
+    }
     NVIC_EnableIRQ(USART2_IRQn);
     break;
   /* USART3 */
@@ -130,6 +220,48 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.AF_Select = 7;
     pclk = APB1_CLK; // Set peripheral clock speed for USART3
     g_huart3 = huart; // Store the handle for USART3
+    if (huart->Init.DMA_Enable) {
+      huart->Instance->CR3 |= USART_CR3_DMAT;
+      hdma_tx = (DMA_Config_t){
+          .Instance = DMA1,
+          .Str_Instance = DMA1_Stream3,
+          .Channel = 4,
+          .Priority = DMA_PRIORITY_HIGH,
+          .Direction = MEMORY_TO_PERIPHERAL,
+          .memSize = DMA_MEM_SIZE_8BIT,
+          .periSize = DMA_PERIPH_SIZE_8BIT,
+          .Mode = DMA_MODE_NORMAL,
+          .tran_count = huart->txTranSize,
+          .pPeriphAddress = (volatile void *)&huart->Instance->DR,
+          .pMemAddress = (void *)huart->pTxBuff,
+          .peripheralInc = false,
+          .memoryInc = true,
+          .half_tran_interrupt = false,
+          .tran_complete_interrupt = true,
+          .tran_error_interrupt = true
+      };
+
+      hdma_rx = (DMA_Config_t){
+          .Instance = DMA1,
+          .Str_Instance = DMA1_Stream1,
+          .Channel = 4,
+          .Priority = DMA_PRIORITY_HIGH,
+          .Direction = PERIPHERAL_TO_MEMORY,
+          .memSize = DMA_MEM_SIZE_8BIT,
+          .periSize = DMA_PERIPH_SIZE_8BIT,
+          .Mode = DMA_MODE_NORMAL,
+          .tran_count = huart->rxTranSize,
+          .pPeriphAddress = (volatile void *)&huart->Instance->DR,
+          .pMemAddress = (void *)huart->pRxBuff,
+          .peripheralInc = false,
+          .memoryInc = true,
+          .half_tran_interrupt = false,
+          .tran_complete_interrupt = true,
+          .tran_error_interrupt = true
+      };
+      DMA_Init(&hdma_tx);
+      DMA_Init(&hdma_rx);
+    }
     NVIC_EnableIRQ(USART3_IRQn);
     break;
   /* UART4 */
@@ -157,6 +289,48 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.AF_Select = 8;
     pclk = APB1_CLK; // Set peripheral clock speed for UART4
     g_huart4 = huart; // Store the handle for UART4
+    if (huart->Init.DMA_Enable) {
+      huart->Instance->CR3 |= USART_CR3_DMAT;
+      hdma_tx = (DMA_Config_t){
+          .Instance = DMA1,
+          .Str_Instance = DMA1_Stream4,
+          .Channel = 4,
+          .Priority = DMA_PRIORITY_HIGH,
+          .Direction = MEMORY_TO_PERIPHERAL,
+          .memSize = DMA_MEM_SIZE_8BIT,
+          .periSize = DMA_PERIPH_SIZE_8BIT,
+          .Mode = DMA_MODE_NORMAL,
+          .tran_count = huart->txTranSize,
+          .pPeriphAddress = (volatile void *)&huart->Instance->DR,
+          .pMemAddress = (void *)huart->pTxBuff,
+          .peripheralInc = false,
+          .memoryInc = true,
+          .half_tran_interrupt = false,
+          .tran_complete_interrupt = true,
+          .tran_error_interrupt = true
+      };
+
+      hdma_rx = (DMA_Config_t) {
+          .Instance = DMA1,
+          .Str_Instance = DMA1_Stream2,
+          .Channel = 4,
+          .Priority = DMA_PRIORITY_HIGH,
+          .Direction = PERIPHERAL_TO_MEMORY,
+          .memSize = DMA_MEM_SIZE_8BIT,
+          .periSize = DMA_PERIPH_SIZE_8BIT,
+          .Mode = DMA_MODE_NORMAL,
+          .tran_count = huart->rxTranSize,
+          .pPeriphAddress = (volatile void *)&huart->Instance->DR,
+          .pMemAddress = (void *)huart->pRxBuff,
+          .peripheralInc = false,
+          .memoryInc = true,
+          .half_tran_interrupt = false,
+          .tran_complete_interrupt = true,
+          .tran_error_interrupt = true
+      };
+      DMA_Init(&hdma_tx);
+      DMA_Init(&hdma_rx);
+    }
     NVIC_EnableIRQ(UART4_IRQn);
     break;
   /* UART5 */
@@ -172,6 +346,48 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.AF_Select = 8;
     pclk = APB1_CLK; // Set peripheral clock speed for UART5
     g_huart5 = huart; // Store the handle for UART5
+    if (huart->Init.DMA_Enable) {
+      huart->Instance->CR3 |= USART_CR3_DMAT;
+      hdma_tx = (DMA_Config_t){
+          .Instance = DMA1,
+          .Str_Instance = DMA1_Stream7,
+          .Channel = 4,
+          .Priority = DMA_PRIORITY_HIGH,
+          .Direction = MEMORY_TO_PERIPHERAL,
+          .memSize = DMA_MEM_SIZE_8BIT,
+          .periSize = DMA_PERIPH_SIZE_8BIT,
+          .Mode = DMA_MODE_NORMAL,
+          .tran_count = huart->txTranSize,
+          .pPeriphAddress = (volatile void *)&huart->Instance->DR,
+          .pMemAddress = (void *)huart->pTxBuff,
+          .peripheralInc = false,
+          .memoryInc = true,
+          .half_tran_interrupt = false,
+          .tran_complete_interrupt = true,
+          .tran_error_interrupt = true
+      };
+
+      hdma_rx = (DMA_Config_t) {
+          .Instance = DMA1,
+          .Str_Instance = DMA1_Stream0,
+          .Channel = 4,
+          .Priority = DMA_PRIORITY_HIGH,
+          .Direction = PERIPHERAL_TO_MEMORY,
+          .memSize = DMA_MEM_SIZE_8BIT,
+          .periSize = DMA_PERIPH_SIZE_8BIT,
+          .Mode = DMA_MODE_NORMAL,
+          .tran_count = huart->rxTranSize,
+          .pPeriphAddress = (volatile void *)&huart->Instance->DR,
+          .pMemAddress = (void *)huart->pRxBuff,
+          .peripheralInc = false,
+          .memoryInc = true,
+          .half_tran_interrupt = false,
+          .tran_complete_interrupt = true,
+          .tran_error_interrupt = true
+      };
+      DMA_Init(&hdma_tx);
+      DMA_Init(&hdma_rx);
+    }
     NVIC_EnableIRQ(UART5_IRQn);
     break;
   /* USART6 */
@@ -199,6 +415,48 @@ void UART_Init(UART_HandleTypeDef *huart) {
     rxConfig.AF_Select = 8;
     pclk = APB2_CLK; // Set peripheral clock speed for USART6
     g_huart6 = huart; // Store the handle for USART6
+    if (huart->Init.DMA_Enable) {
+      huart->Instance->CR3 |= USART_CR3_DMAT;
+      hdma_tx = (DMA_Config_t){
+          .Instance = DMA2,
+          .Str_Instance = DMA2_Stream6,
+          .Channel = 5,
+          .Priority = DMA_PRIORITY_HIGH,
+          .Direction = MEMORY_TO_PERIPHERAL,
+          .memSize = DMA_MEM_SIZE_8BIT,
+          .periSize = DMA_PERIPH_SIZE_8BIT,
+          .Mode = DMA_MODE_NORMAL,
+          .tran_count = huart->txTranSize,
+          .pPeriphAddress = (volatile void *)&huart->Instance->DR,
+          .pMemAddress = (void *)huart->pTxBuff,
+          .peripheralInc = false,
+          .memoryInc = true,
+          .half_tran_interrupt = false,
+          .tran_complete_interrupt = true,
+          .tran_error_interrupt = true
+      };
+
+      hdma_rx = (DMA_Config_t){
+          .Instance = DMA2,
+          .Str_Instance = DMA2_Stream1,
+          .Channel = 5,
+          .Priority = DMA_PRIORITY_HIGH,
+          .Direction = PERIPHERAL_TO_MEMORY,
+          .memSize = DMA_MEM_SIZE_8BIT,
+          .periSize = DMA_PERIPH_SIZE_8BIT,
+          .Mode = DMA_MODE_NORMAL,
+          .tran_count = huart->rxTranSize,
+          .pPeriphAddress = (volatile void *)&huart->Instance->DR,
+          .pMemAddress = (void *)huart->pRxBuff,
+          .peripheralInc = false,
+          .memoryInc = true,
+          .half_tran_interrupt = false,
+          .tran_complete_interrupt = true,
+          .tran_error_interrupt = true
+      };
+      DMA_Init(&hdma_tx);
+      DMA_Init(&hdma_rx);
+    }
     NVIC_EnableIRQ(USART6_IRQn);
     break;
   default:
@@ -470,10 +728,27 @@ void UART_IRQHandler(UART_HandleTypeDef *huart) {
   }
 }
 
-// TODO: Change HUART to contain dma settings, then add them to the init function.
-// ACTUALLY; I have to make a DMA HAL and driver first.
+// DMA driver is WIP
 USART_Status_t Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size) {
+  //TODO: Implement DMA flags clearing before reuse
+  if (huart == NULL || pData == NULL || Size == 0) {
+    return USART_STATUS_ERROR; // Invalid parameters  
+  }
 
+  huart->pTxBuff = pData;
+  huart->txTranSize = Size;
+  huart->txTranRemain = Size;
+
+  if ((huart->txTranRemain != 0) || (hdma_tx.Str_Instance->CR & DMA_SxCR_EN)) {
+    return USART_STATUS_ERROR; // Transmission already in progress
+  }
+
+  hdma_tx.tran_count = Size; // Set the transfer count for DMA
+  hdma_tx.pMemAddress = (void *)pData; // Set the memory address for DMA transfer
+  DMA_Init(&hdma_tx); // Re-initialize the DMA with updated parameters
+  DMA_Start(&hdma_tx); // Start the DMA transfer
+  // TODO: Implement a mechanism to wait for DMA transfer completion or handle it via interrupt
+  return USART_STATUS_OK;
 }
 
 uint8_t Recieve_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size, uint32_t timeout) {
