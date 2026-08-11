@@ -43,6 +43,7 @@ typedef enum {
 
 
 typedef struct {
+    void *Owner;
     DMA_TypeDef *Instance; 
     uint8_t Channel; // DMA channel number
     DMA_Stream_TypeDef *Str_Instance; // Pointer to the actual DMA stream.

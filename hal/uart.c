@@ -68,6 +68,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
       huart->Instance->CR3 |= USART_CR3_DMAT;
       // TX
       huart->hdma_tx = (DMA_Config_t){
+          .Owner = huart,
           .Instance = DMA2,
           .Str_Instance = DMA2_Stream7,
           .Channel = 4,
@@ -88,6 +89,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
 
       // RX
       huart->hdma_rx = (DMA_Config_t){
+          .Owner = huart,
           .Instance = DMA2,
           .Str_Instance = DMA2_Stream2,
           .Channel = 4,
@@ -138,6 +140,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     if (huart->Init.DMA_Enable) {
       huart->Instance->CR3 |= USART_CR3_DMAT;
       huart->hdma_tx = (DMA_Config_t){
+          .Owner = huart,
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream6,
           .Channel = 4,
@@ -157,6 +160,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
       };
 
       huart->hdma_rx = (DMA_Config_t){
+          .Owner = huart,
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream5,
           .Channel = 4,
@@ -220,6 +224,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     if (huart->Init.DMA_Enable) {
       huart->Instance->CR3 |= USART_CR3_DMAT;
       huart->hdma_tx = (DMA_Config_t){
+          .Owner = huart,
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream3,
           .Channel = 4,
@@ -239,6 +244,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
       };
 
       huart->hdma_rx = (DMA_Config_t){
+          .Owner = huart,
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream1,
           .Channel = 4,
@@ -289,6 +295,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     if (huart->Init.DMA_Enable) {
       huart->Instance->CR3 |= USART_CR3_DMAT;
       huart->hdma_tx = (DMA_Config_t){
+          .Owner = huart,
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream4,
           .Channel = 4,
@@ -308,6 +315,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
       };
 
       huart->hdma_rx = (DMA_Config_t) {
+          .Owner = huart,
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream2,
           .Channel = 4,
@@ -346,6 +354,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     if (huart->Init.DMA_Enable) {
       huart->Instance->CR3 |= USART_CR3_DMAT;
       huart->hdma_tx = (DMA_Config_t){
+          .Owner = huart,
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream7,
           .Channel = 4,
@@ -365,6 +374,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
       };
 
       huart->hdma_rx = (DMA_Config_t) {
+          .Owner = huart,
           .Instance = DMA1,
           .Str_Instance = DMA1_Stream0,
           .Channel = 4,
@@ -415,6 +425,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
     if (huart->Init.DMA_Enable) {
       huart->Instance->CR3 |= USART_CR3_DMAT;
       huart->hdma_tx = (DMA_Config_t){
+          .Owner = huart,
           .Instance = DMA2,
           .Str_Instance = DMA2_Stream6,
           .Channel = 5,
@@ -434,6 +445,7 @@ void UART_Init(UART_HandleTypeDef *huart) {
       };
 
       huart->hdma_rx = (DMA_Config_t){
+          .Owner = huart,
           .Instance = DMA2,
           .Str_Instance = DMA2_Stream1,
           .Channel = 5,
@@ -778,9 +790,13 @@ USART_Status_t Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t 
 
   huart->hdma_tx.tran_count = Size; // Set the transfer count for DMA
   huart->hdma_tx.pMemAddress = (void *)pData; // Set the memory address for DMA transfer
+  // Clearing the DMA EN bit before reinit
+  huart->hdma_tx.Str_Instance->CR &= ~DMA_SxCR_EN; // Disable the DMA stream
+  while(!(huart->hdma_tx.Str_Instance->CR & DMA_SxCR_EN)); // Wait until the stream is disabled
   DMA_Init(&huart->hdma_tx); // Re-initialize the DMA with updated parameters
   DMA_Start(&huart->hdma_tx); // Start the DMA transfer
   // TODO: Implement a mechanism to wait for DMA transfer completion or handle it via interrupt
+
   return USART_STATUS_OK;
 }
 

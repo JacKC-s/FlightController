@@ -97,3 +97,5 @@ void DMA_Stop(DMA_Config_t *hdma) {
   // Disable the DMA stream
   hdma->Str_Instance->CR &= ~DMA_SxCR_EN;
 }
+
+// The IRQHandler is just a bunch of rote code
