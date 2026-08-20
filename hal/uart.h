@@ -66,7 +66,6 @@ typedef struct {
   DMA_Config_t hdma_rx; // DMA config for RX
 } UART_HandleTypeDef;
 
-/*Everything under here is non functional yet. Need to learn more about UART.*/
 
 // Initialization functions
 void UART_Init(UART_HandleTypeDef *huart);
@@ -78,6 +77,9 @@ USART_Status_t Transmit_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t
 USART_Status_t Transmit_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData,
                         uint16_t Size);
 USART_Status_t Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size);
+
+void UART_DMA_TxCompleteCallback(DMA_Config_t *hdma_tx);
+void UART_DMA_TxErrorCallback(DMA_Config_t *hdma_tx);
 
 // RX functions
 uint8_t Recieve_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size,

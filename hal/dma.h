@@ -42,7 +42,10 @@ typedef enum {
 } DMA_Mode_t;
 
 
-typedef struct {
+typedef struct DMA_Config DMA_Config_t;
+typedef void (*DMA_Callback_t)(DMA_Config_t *hdma);
+
+struct DMA_Config {
     void *Owner;
     DMA_TypeDef *Instance; 
     uint8_t Channel; // DMA channel number
@@ -63,7 +66,10 @@ typedef struct {
     bool half_tran_interrupt; // Half transfer interrupt enable
     bool tran_complete_interrupt; // Transfer complete interrupt enable
     bool tran_error_interrupt; // Transfer error interrupt enable
-} DMA_Config_t;
+    DMA_Callback_t transferCompleteCallback;
+    DMA_Callback_t transferErrorCallback;
+};
+
 
 void DMA_Init(DMA_Config_t *hdma);
 void DMA_DeInit(DMA_Config_t *hdma);
