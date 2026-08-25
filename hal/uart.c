@@ -982,7 +982,7 @@ USART_Status_t Transmit_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t
   for (uint16_t i = 0; i < Size; i++) {
     // Wait until TXE (Transmit Data Register Empty) flag is set
     uint32_t startTick = xTaskGetTickCount(); // cool use of FreeRTOS tick count for timeout
-    while (!(huart->Instance->SR & USART_SR_TXE)) {
+    while (!(huart->Instance->SR & USART_SR_RXNE)) {
       if ((xTaskGetTickCount() - startTick) > timeout) {
         return USART_STATUS_TIMEOUT; // Timeout occurred
       }
