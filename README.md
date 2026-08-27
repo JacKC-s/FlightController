@@ -126,6 +126,12 @@ The project uses a Makefile-based build system with `arm-none-eabi-gcc` for cros
 - `st-flash` (from [stlink](https://github.com/stlink-org/stlink)) — flashing over the on-board ST-Link debugger
 - `make`
 
+### Windows setup
+
+Build this project from the Windows Subsystem for Linux (WSL); native Windows command prompts are not supported. Install WSL with a Linux distribution (Ubuntu is recommended), then open its terminal and clone or access the repository from there.
+
+Install the prerequisites inside WSL and run all `make` commands from the WSL terminal. If you need to flash the board from Windows, ensure its USB ST-Link device is available to WSL (for example, by using USB/IP passthrough) before running `make flash`.
+
 ### Compilation
 
 Build the firmware (ELF, BIN, and HEX outputs):
