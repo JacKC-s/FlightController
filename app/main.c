@@ -3,32 +3,52 @@
 #include "stm32f446xx.h"
 #include "task.h"
 
-#define LED_PORT GPIOA
-#define LED_PIN 5
+#define STEP_PORT GPIOA
+#define STEP_PIN 5
+#define DIR_PORT GPIOA
+#define DIR_PIN 6
 
-// LED Blink Task
-
-static void vLEDTask(void *pvParameters) {
+static void vStepTask(void *pvParameters) {
   (void)pvParameters;
 
+
+  
   for (;;) {
-    GPIO_TogglePin(LED_PORT, LED_PIN);
+    GPIO_WritePin(STEP_PORT, STEP_PIN, GPIO_PIN_SET);
     vTaskDelay(pdMS_TO_TICKS(1000));
+    GPIO_WritePin(DIR_PORT, DIR_PIN, GPIO_PIN_RESET);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
+    GPIO_WritePin(STEP_PORT, STEP_PIN, GPIO_PIN_RESET);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    GPIO_WritePin(DIR_PORT, DIR_PIN, GPIO_PIN_SET);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
   }
 }
 
 int main(void) {
 
-  GPIO_PinConfig_t ledConf = {.Pin = LED_PIN,
+  GPIO_PinConfig_t stepConf = {.Pin = STEP_PIN,
                               .Mode = GPIO_MODE_OUTPUT,
                               .OType = GPIO_OTYPE_PP,
                               .Speed = GPIO_SPEED_HIGH,
                               .Pull = GPIO_PUPD_NONE,
                               .AF_Select = 0};
 
-  GPIO_Init(LED_PORT, &ledConf);
+  GPIO_PinConfig_t dirConf = {.Pin = DIR_PIN,
+                              .Mode = GPIO_MODE_OUTPUT,
+                              .OType = GPIO_OTYPE_PP,
+                              .Speed = GPIO_SPEED_HIGH,
+                              .Pull = GPIO_PUPD_NONE,
+                              .AF_Select = 0};
 
-  if (xTaskCreate(vLEDTask, "LED Blink", 128, NULL, 1, NULL) != pdPASS) {
+  GPIO_Init(STEP_PORT, &stepConf);
+  GPIO_Init(DIR_PORT, &dirConf);
+  GPIO_WritePin(STEP_PORT, STEP_PIN, GPIO_PIN_RESET);
+  GPIO_WritePin(DIR_PORT, DIR_PIN, GPIO_PIN_RESET);
+
+  if (xTaskCreate(vStepTask, "STEP", 128, NULL, 3, NULL) != pdPASS) {
     while (1)
       ;
   }
@@ -37,4 +57,5 @@ int main(void) {
 
   while (1)
     ;
+
 }

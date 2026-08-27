@@ -982,7 +982,7 @@ USART_Status_t Transmit_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t
   for (uint16_t i = 0; i < Size; i++) {
     // Wait until TXE (Transmit Data Register Empty) flag is set
     uint32_t startTick = xTaskGetTickCount(); // cool use of FreeRTOS tick count for timeout
-    while (!(huart->Instance->SR & USART_SR_RXNE)) {
+    while (!(huart->Instance->SR & USART_SR_TXE)) {
       if ((xTaskGetTickCount() - startTick) > timeout) {
         return USART_STATUS_TIMEOUT; // Timeout occurred
       }
@@ -1041,6 +1041,23 @@ void UART_IRQHandler(UART_HandleTypeDef *huart) {
 	huart->txTranRemain = 0;
       }
   //TODO: write code for rx IRQ handling.
+  if ((huart->Instance->SR & USART_SR_RXNE) && (huart->Instance->CR1 & USART_CR1_RXNEIE)) {
+    if (huart->rxTranRemain > 0) {
+      // Write data to the data register
+      *(huart->pRxBuff) = (uint8_t)huart->Instance->DR;
+      huart->pRxBuff++;
+      huart->rxTranRemain--;
+      if (huart->rxTranRemain == 0) {
+	huart->Instance->CR1 &= ~USART_CR1_RXNEIE;
+      }
+    } else {
+      // Transmission complete, disable TXE interrupt
+      huart->Instance->CR1 &= ~USART_CR1_RXNEIE;
+      huart->Instance->CR1 &= ~USART_CR1_TCIE;
+      }
+   
+    }
+
 }
 
 void UART_DMA_TxCompleteCallback(DMA_Config_t *hdma) {
@@ -1132,7 +1149,7 @@ uint8_t Recieve_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size, u
   // Timeout functionality
    for (uint16_t i = 0; i < Size; i++) {
 	uint32_t startTick = xTaskGetTickCount();
-    while (!(huart->Instance->SR & USART_SR_TXE)) {
+    while (!(huart->Instance->SR & USART_SR_RXNE)) {
       if ((xTaskGetTickCount() - startTick) > timeout) {
         return USART_STATUS_TIMEOUT; // Timeout occurred
       }
@@ -1152,7 +1169,7 @@ uint8_t Recieve_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Si
   if (huart == NULL || pData == NULL || Size == 0) {
     return USART_STATUS_ERROR; // Invalid parameters
   }
-  if (huart->rxTranSize != 0) {
+  if (huart->rxTranRemain != 0) {
     return USART_STATUS_ERROR; // Already in use
   }
 
@@ -1160,6 +1177,7 @@ uint8_t Recieve_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Si
   huart->rxTranSize = Size;
   huart->rxTranRemain = Size;
 
+  huart->Instance->CR1 |= USART_CR1_RXNEIE;
   return USART_STATUS_OK;
 }
 uint8_t Recieve_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size) {
