@@ -82,7 +82,7 @@ void UART_DMA_TxCompleteCallback(DMA_Config_t *hdma_tx);
 void UART_DMA_TxErrorCallback(DMA_Config_t *hdma_tx);
 
 // RX functions
-uint8_t Recieve_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size,
+USART_Status_t Recieve_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size,
                      uint32_t timeout); // Most likely to not be used
 uint8_t Recieve_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData,
                           uint16_t Size);

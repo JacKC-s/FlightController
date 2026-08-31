@@ -8,26 +8,36 @@
 #define DIR_PORT GPIOA
 #define DIR_PIN 6
 
+// Microsecond delay function
+void delay_us(uint32_t us) {
+  uint32_t start = DWT->CYCCNT;
+  uint32_t ticks = us * (SystemCoreClock / 1000000);
+  while ((DWT->CYCCNT - start) < ticks)
+    ;
+}
+
+void DWT_Init(void)
+{
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CYCCNT = 0;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+}
+
 static void vStepTask(void *pvParameters) {
   (void)pvParameters;
-
 
   
   for (;;) {
     GPIO_WritePin(STEP_PORT, STEP_PIN, GPIO_PIN_SET);
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    GPIO_WritePin(DIR_PORT, DIR_PIN, GPIO_PIN_RESET);
-    vTaskDelay(pdMS_TO_TICKS(1000));
-
+    delay_us(5); // 500 microseconds pulse width
     GPIO_WritePin(STEP_PORT, STEP_PIN, GPIO_PIN_RESET);
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    GPIO_WritePin(DIR_PORT, DIR_PIN, GPIO_PIN_SET);
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    delay_us(5); // 500 microseconds delay
 
   }
 }
 
 int main(void) {
+  DWT_Init();
 
   GPIO_PinConfig_t stepConf = {.Pin = STEP_PIN,
                               .Mode = GPIO_MODE_OUTPUT,

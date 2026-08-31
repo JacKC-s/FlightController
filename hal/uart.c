@@ -1030,14 +1030,15 @@ void UART_IRQHandler(UART_HandleTypeDef *huart) {
       huart->Instance->DR = *(huart->pTxBuff);
       huart->pTxBuff++;
       huart->txTranRemain--;
-    } else {
-      // Transmission complete, disable TXE interrupt
-      huart->Instance->CR1 &= ~USART_CR1_TXEIE;
-	huart->Instance->CR1 &= ~USART_CR1_TCIE;
+      if (huart->txTranRemain == 0) {
+	huart->Instance->CR1 &= ~USART_CR1_TXEIE;
+	huart->Instance->CR1 |= USART_CR1_TCIE;
       }
-    }
+    }    
+  }
 
   if ((huart->Instance->SR & USART_SR_TC) && (huart->Instance->CR1 & USART_CR1_TCIE)) {
+	huart->Instance->CR1 &= ~USART_CR1_TCIE;
 	huart->txTranRemain = 0;
       }
   //TODO: write code for rx IRQ handling.
@@ -1142,8 +1143,8 @@ USART_Status_t Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t 
   return USART_STATUS_OK;
 }
 
-uint8_t Recieve_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size, uint32_t timeout) {
-  if (huart == NULL | pData == NULL | Size == 0) {
+USART_Status_t Recieve_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size, uint32_t timeout) {
+  if (huart == NULL || pData == NULL || Size == 0) {
 	return USART_STATUS_ERROR;
   }
   // Timeout functionality
@@ -1156,14 +1157,7 @@ uint8_t Recieve_Poll(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size, u
    }
      pData[i] = huart->Instance->DR;	
    }
-  uint32_t startTick = xTaskGetTickCount();
-  while (!(huart->Instance->SR & USART_SR_TC)) {
-    if ((xTaskGetTickCount() - startTick) > timeout) {
-      return USART_STATUS_TIMEOUT; // Timeout occurred
-    }
-
-}
-  return *pData;
+    return USART_STATUS_OK;
 }
 uint8_t Recieve_Interrupt(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size) {
   if (huart == NULL || pData == NULL || Size == 0) {
